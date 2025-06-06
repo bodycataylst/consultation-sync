@@ -847,25 +847,25 @@ async function main() {
 }
 
 // Set up cron job to run main() every 7 days at midnight
-// cron.schedule('0 0 */7 * *', () => {
-//   console.log('Running scheduled task...');
-//   main()
-//     .then(() => {
-//       console.log("Scheduled task completed successfully.");
-//     })
-//     .catch((error) => {
-//       console.error("Scheduled task failed:", error.message);
-//     });
-// });
+cron.schedule("0 0 */7 * *", () => {
+  console.log("Running scheduled task...");
+  main()
+    .then(() => {
+      console.log("Scheduled task completed successfully.");
+    })
+    .catch((error) => {
+      console.error("Scheduled task failed:", error.message);
+    });
+});
 
 app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  main()
-    .then(() => {
-      console.log("Initial script execution completed successfully.");
-    })
-    .catch((error) => {
-      console.error("Initial script execution failed:", error.message);
-      process.exit(1);
-    });
+  // main()
+  //   .then(() => {
+  //     console.log("Initial script execution completed successfully.");
+  //   })
+  //   .catch((error) => {
+  //     console.error("Initial script execution failed:", error.message);
+  //     process.exit(1);
+  //   });
 });
