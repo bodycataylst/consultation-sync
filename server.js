@@ -810,7 +810,7 @@ async function moveDealToStage(dealId, stageId) {
  */
 async function main() {
   const startDate = new Date();
-  startDate.setMonth(startDate.getMonth() - 2);
+  startDate.setDate(startDate.getDate() - 7);
 
   console.log(
     `Starting processing from ${startDate.toISOString().split("T")[0]}`
