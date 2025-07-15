@@ -686,6 +686,7 @@ async function fetchAssociatedContact(dealId) {
   const contactProperties = [
     "zenoti_package_name",
     "zenoti_package_amount",
+    "accumulated_total_spent",
     "membership_status",
   ];
 
@@ -758,6 +759,13 @@ function evaluateDealConditions(contact, lineItems) {
   if (
     contact.zenoti_package_amount &&
     parseFloat(contact.zenoti_package_amount) > 100
+  ) {
+    return true;
+  }
+
+  if (
+    contact.accumulated_total_spent &&
+    parseFloat(contact.accumulated_total_spent) > 100
   ) {
     return true;
   }
