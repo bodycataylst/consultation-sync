@@ -846,8 +846,8 @@ async function main() {
   }
 }
 
-// Set up cron job to run main() every 7 days at midnight
-cron.schedule("0 0 */7 * *", () => {
+// Set up cron job to run main() every Monday
+cron.schedule("0 0 * * 1", () => {
   console.log("Running scheduled task...");
   main()
     .then(() => {
