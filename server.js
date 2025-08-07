@@ -668,18 +668,28 @@ async function fetchDealsByStage(stageId) {
           ],
         },
       ],
-      properties: ["amount", "createdate", "dealstage", "closedate"], // Fetch only required properties
+      properties: ["amount", "createdate", "dealstage", "closedate", "name"], // Fetch only required properties
       limit: 200, // Fetch up to 100 deals at a time
       after: after ? String(after) : undefined,
-      // sorts: [{ propertyName: "createdate", direction: "DESCENDING" }],
+      sorts: [{ propertyName: "createdate", direction: "ASCENDING" }],
     });
 
     deals = deals.concat(response.results);
     console.log(response.paging?.next?.after);
     after = response.paging?.next?.after;
-  } while (after);
+  } while (after && after != "1000");
 
   return deals;
+}
+
+async function fetchDealById(dealId) {
+  const response = await hubspotClient.crm.deals.basicApi.getById(
+    dealId,
+    ["amount", "createdate", "dealstage", "closedate", "name"] // Fetch only required properties
+  );
+
+  console.log("Deal fetched: ", response);
+  return [response];
 }
 
 async function fetchAssociatedContact(dealId) {
@@ -818,7 +828,7 @@ async function moveDealToStage(dealId, stageId) {
  */
 async function main() {
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 7);
+  startDate.setDate(startDate.getDate() - 2);
 
   console.log(
     `Starting processing from ${startDate.toISOString().split("T")[0]}`
@@ -829,33 +839,33 @@ async function main() {
     await processWeeklyData(startDate);
 
     // Then process deals in the source stage
-    console.log("Starting deal stage processing...");
-    const results = await processDealStage(
-      SOURCE_STAGE_ID,
-      CONVERTED_STAGE_ID,
-      UNCONVERTED_STAGE_ID
-    );
+    // console.log("Starting deal stage processing...");
+    // const results = await processDealStage(
+    //   SOURCE_STAGE_ID,
+    //   CONVERTED_STAGE_ID,
+    //   UNCONVERTED_STAGE_ID
+    // );
 
-    console.log("\nProcessing complete:");
-    console.log(`Total deals processed: ${results.processed}`);
-    console.log(`Deals moved to converted stage: ${results.converted}`);
-    console.log(`Deals moved to unconverted stage: ${results.unconverted}`);
-    console.log(`Errors encountered: ${results.errors.length}`);
+    // console.log("\nProcessing complete:");
+    // console.log(`Total deals processed: ${results.processed}`);
+    // console.log(`Deals moved to converted stage: ${results.converted}`);
+    // console.log(`Deals moved to unconverted stage: ${results.unconverted}`);
+    // console.log(`Errors encountered: ${results.errors.length}`);
 
-    if (results.errors.length > 0) {
-      console.log("\nErrors:");
-      results.errors.forEach((error) => {
-        console.log(`- Deal ${error.dealId || "unknown"}: ${error.error}`);
-      });
-    }
+    // if (results.errors.length > 0) {
+    //   console.log("\nErrors:");
+    //   results.errors.forEach((error) => {
+    //     console.log(`- Deal ${error.dealId || "unknown"}: ${error.error}`);
+    //   });
+    // }
   } catch (error) {
     console.error("Fatal error:", error.message);
     return error;
   }
 }
 
-// Set up cron job to run main() every Monday
-cron.schedule("0 0 * * 1", () => {
+// Set up cron job to run main() every day at 12:00 AM
+cron.schedule("0 0 * * *", () => {
   console.log("Running scheduled task...");
   main()
     .then(() => {
@@ -868,12 +878,12 @@ cron.schedule("0 0 * * 1", () => {
 
 app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  // main()
-  //   .then(() => {
-  //     console.log("Initial script execution completed successfully.");
-  //   })
-  //   .catch((error) => {
-  //     console.error("Initial script execution failed:", error.message);
-  //     process.exit(1);
-  //   });
+  main()
+    .then(() => {
+      console.log("Initial script execution completed successfully.");
+    })
+    .catch((error) => {
+      console.error("Initial script execution failed:", error.message);
+      process.exit(1);
+    });
 });
